@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.wolfcode.car.business.mapper.EmployeeMapper" >
+  <resultMap id="BaseResultMap" type="cn.wolfcode.car.business.domain.Employee" >
+    <id column="id" property="id" />
+    <result column="name" property="name" />
+    <result column="email" property="email" />
+    <result column="age" property="age" />
+    <result column="sex" property="sex" />
+    <result column="admin" property="admin" />
+    <result column="status" property="status" />
+    <result column="dept_id" property="deptId" />
+    <result column="hiredate" property="hiredate" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" >
+    delete from employee
+    where id = #{id}
+  </delete>
+  <insert id="insert" useGeneratedKeys="true" keyProperty="id" >
+    insert into employee (name, email, age, sex, admin, status, dept_id, hiredate
+      )
+    values (#{name}, #{email}, #{age}, #{sex}, #{admin}, #{status}, #{deptId}, #{hiredate}
+      )
+  </insert>
+  <update id="updateByPrimaryKey" >
+    update employee
+    set name = #{name},
+      email = #{email},
+      age = #{age},
+      sex = #{sex},
+      admin = #{admin},
+      status = #{status},
+      dept_id = #{deptId},
+      hiredate = #{hiredate}
+    where id = #{id}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" >
+    select id, name, email, age, sex, admin, status, dept_id, hiredate
+    from employee
+    where id = #{id}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select id, name, email, age, sex, admin, status, dept_id, hiredate
+    from employee
+  </select>
+    <select id="selectForList" resultMap="BaseResultMap" >
+      select id, name, email, age, sex, admin, status, dept_id, hiredate
+      from employee
+    <where>
+      <if test="beginTime != null">
+        and date_format(hiredate,'%Y-%m-%d')  >= date_format(#{beginTime},'%Y-%m-%d')
+      </if>
+      <if test="endTime != null">
+        and  date_format(#{endTime},'%Y-%m-%d') >=  date_format(hiredate,'%Y-%m-%d')
+      </if>
+    <if test="keyword != null and keyword!= '' ">
+         and ( name like concat('%',#{keyword},'%') or email like concat('%',#{keyword},'%'))
+    </if>
+      <if test="admin != null">
+        and  admin = #{admin}
+      </if>
+      <if test="status != null">
+        and  status = #{status}
+      </if>
+      <if test="deptId != null">
+        and  dept_id = #{deptId}
+      </if>
+    </where>
+    </select>
+</mapper>

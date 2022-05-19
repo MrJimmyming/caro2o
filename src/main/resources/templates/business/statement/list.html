@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="common/include :: header('结算单列表')" />
+</head>
+<body class="gray-bg">
+	<div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="statement-form">
+					<div class="select-list">
+						<ul>
+							<li>
+								客户姓名：<input type="text" name="customerName"/>
+							</li>
+							<li>
+								联系方式：<input type="text" name="customerPhone"/>
+							</li>
+							<li>
+								车牌号码：<input type="text" name="licensePlate"/>
+							</li>
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+							    <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+			
+			<div class="btn-group-sm" id="toolbar" role="group">
+				<a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="business:statement:add">
+	                <i class="fa fa-plus"></i> 新增
+	            </a>
+	        </div>
+	        
+	        <div class="col-sm-12 select-table table-striped">
+			    <table id="bootstrap-table"></table>
+			</div>
+		</div>
+	</div>
+	<th:block th:include="common/include :: footer" />
+	<script th:inline="javascript">
+
+		var editFlag = [[${@permission.hasPermi('business:statement:edit')}]];
+		var removeFlag = [[${@permission.hasPermi('business:statement:remove')}]];
+
+
+
+		var prefix = ctx + "/business/statement";
+
+		var serviceCatalogDatas = [[${@dict.getType('cmi_service_type')}]];
+		var statusDatas = [[${@dict.getType('statement_status')}]];
+
+		$(function() {
+		    var options = {
+		        url: prefix + "/query",
+		        createUrl: prefix + "/addPage",
+		        updateUrl: prefix + "/editPage?id={id}",
+		        removeUrl: prefix + "/remove",
+		        exportUrl: prefix + "/export",
+		        modalName: "结算单",
+		        columns: [{
+		            checkbox: true
+		        },
+		        {
+		            field: 'id',
+		            title: '',
+					visible: false
+		        },
+		        {
+		            field: 'customerName',
+		            title: '客户姓名'
+		        },
+		        {
+		            field: 'customerPhone',
+		            title: '联系方式',
+		        },
+				{
+					field: 'actualArrivalTime',
+					title: '到店时间',
+				},
+				{
+					field: 'licensePlate',
+					title: '车牌号码',
+				},
+				{
+					field: 'carSeries',
+					title: '汽车类型',
+				},
+				{
+					field: 'serviceType',
+					title: '服务类型',
+					formatter: function(value, row, index) {
+						return $.table.selectDictLabel(serviceCatalogDatas, value);
+					}
+				},
+				{
+					field: 'status',
+					title: '结算状态',
+					formatter: function(value, row, index) {
+						return $.table.selectDictLabel(statusDatas, value);
+					}
+				},
+		        {
+		            title: '操作',
+		            align: 'center',
+		            formatter: function(value, row, index) {
+						var actions = [];
+						var editBtn = editFlag +' '+ (row.status == 0 ? '': "disabled");
+
+						var removeBtn = removeFlag+' '+ (row.status == 0 ? '': "disabled") ;
+
+						actions.push('<a class="btn btn-success btn-xs '+ editBtn +'" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+						actions.push('<a class="btn btn-warning btn-xs '+'" href="javascript:void(0)" onclick="detail(\'' + row.id + '\')"><i class="fa fa-list-ul"></i>明细</a> ');
+						actions.push('<a class="btn btn-danger btn-xs '+removeBtn+'" href="javascript:void(0)" onclick="deleteFun(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a> ');
+						return actions.join('');
+		            }
+		        }]
+		    };
+		    $.table.init(options);
+		});
+		function deleteFun(id) {
+			console.log(id);
+			$.modal.confirm("确认删除消费单?", function() {
+				$.operate.remove(id);
+			})
+		}
+		//传回id
+		function detail(id) {
+
+			var url = ctx + '/business/statementItem/listPage?statementId=' + id;
+			$.modal.openTab("结算单明细", url);
+
+		}
+
+
+	</script>
+
+</body>
+</html>
